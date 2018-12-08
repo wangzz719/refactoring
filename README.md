@@ -113,3 +113,97 @@
         - 好处：将很多参数列缩短，简化函数调用
         - 不必在意 Data Clumps 只用上新对象的一部分字段，只要以新对象取代两个（或更多）字段，就值回票价了
         - 如果删除一个数据项，其他数据失去意义，则应该为它们产生一个新的对象。得到新对象后，还可以着手寻找依恋情结（Feature Envy），这可以帮你指出可以移至新类中的种种程序行为
+    - 基本类型偏执（Primitive Obsession）
+        - 大多数编程环境都有两种数据：
+            - 结构类型允许你将数据组织成有意义的形式
+            - 基本类型则是构成结构类型的积木块
+        - 对象存在的一个极大价值在于：它们模糊了横亘于基本数据和体积较大的类之间的界限。你可以轻松编写出一些与语言内置（基本）类型无异的小型类
+        - 你可以运用 Replace Data Value With Object 将原本单独存在的数据值替换为对象，从而走出传统的窟窿，进入炙手可热的对象世界
+        - 如果替换的数据值是类型码，而它并不影响行为，则可以运用 Replace Type Code With Class 将它替换掉
+        - 如果有与类型码相关的条件表达式，可以运用 Replace Type Code With Subclass 或 Replace Type Code With State/Strategy
+        - 如果你有一组应该总是被放在一起的字段，可以运用 Extract Class
+        - 如果在参数列中看到基本类型，可以使用 Introduce Parameter Object
+        - 如果发现自己正在从数组中挑选数据，可以运用 Replace Array With Object
+    - Switch Statements
+        - 面向对象程序员的一个最明显特征就是：少用 Switch 语句
+        - 如果要为 Switch 添加一个新的 case 子句，就必须找到所有 Switch 语句并修改它们，面向对象的多态概念为此提供了优雅的解决办法
+        - 大多数时候，一看到 Switch 语句，就应该考虑以多态来替换它
+        - 使用 Extract Method 将 Switch 语句提炼到一个独立函数中，再使用 Move Method 将它搬移到需要多态性的那个类中。此时需要决定是否使用 Replace Type Code With Subclass 或
+        Replace Type Code With State/Strategy。一旦这样继承完成后，就开业运用 Replace Conditional With Polymorphism 了
+        - 如果只是在单一函数中有选择事例，并且不想改动它们，这种情况下 Replace Parameter With Explicit Methods 是个不错的选择。如果选择条件之一是 null，可以试试 Introduce Null Object
+    - 平行继承体系（Parallel Inheritance Hierarchies）
+        - 平行继承体系：当你为某个类增加一个子类，必须也为另一个类增加相应的子类；如果你发现某个继承体系的类名前缀和另一个集成体系的类名前缀完全相同
+        - 消除平行继承体系的策略是：让一个继承体系的实例引用另一个继承体系的实例；再使用 Move Method 和 Move Field 则可以将引用端的集成体系消弭于无形
+    - 冗赘类（Lazy Class）
+        - 如果一个类的所得不值其身价，它就应该消失
+        - 如果某些子类没有做足够的工作，试试 Collapse Hierarchy。对于几乎没有用的组件，应该以 Inline Class 来对付它们
+    - 夸夸其谈未来性（Speculative Generality）
+        - 如果企图以各式各样的钩子和特殊情况来处理一些非必要的事情，这种结果往往是造成系统的难以理解和维护
+        - 如果所有装置都会被用到，那就值得做，如果用不到，就不值得。用不上的装置会挡住你的路，所以，搬开它吧
+        - 如果有你的某个抽象类其实没有太大作用，请运用 Collapse Hierarchy
+        - 不必要的委托可以用 Inline Class 除掉
+        - 如果函数的某些参数未被用上，可对它实施 Remove Parameter
+        - 如果函数名称带有多余的抽象意味，应该对它实施 Rename Method，让它实现一些
+        - 如果函数或者类的唯一用户是测试用例，就会出现 Speculative Generality。如果发现这样的函数或者类，请把它们联通测试用例一起删掉。但如果它们的用途是帮助测试用例检测正当功能，则不应该删掉
+    - 令人迷惑的临时字段（Temporary Field）
+        - 有时你会看到这样的对象：其内某个实例变量仅仅是为某种特定请求而设，这样的代码让人不易理解
+        - 使用 Extract Method 为其抽象出一个类，然后把所有和这个变量相关的代码都放到这个类中。也许你还可以使用 Introduce Null Object 在"变量不合法"的情况下创造一个 Null 对象，从而避免写出条件式代码
+        - 如果类中有一个复杂的算法，需要好几个变量，往往就可能导致 Temporary Field 的出现，这些字段只有在使用该算法时才有效，其他情况下只会让人迷惑，这时候应该用 Extract Class 把这些变量和其相关函数提炼到一个单独的类中
+    - 过度耦合的消息链（Message Chains）
+        - 对象之间出现链式调用：A -> B -> C，这回导致一旦对象之间的关系发生任何变化，客户端就需要作出相应的修改
+        - 使用 Hide Delegate 进行重构
+        - 先观察消息链最终得到的对象是用来干什么的，看能否使用 Extract Method 把使用该对象的代码提炼到一个独立函数中，再运用 Move Method 把这个函数推入消息链
+    - 中间人（Middle Man）
+        - 对象的基本特征是封装：对外部世界隐藏其内部细节，封装往往伴随委托
+        - 过度运用委托：某个类接口有一半的函数都委托给其他类，这就是过度委托
+        - 这时应该运用 Remove Middle Man，直接和真正负责的对象打交道
+            - 如果这些函数只有少数几个，可以运用  Inline Method 将它们放进调用端
+            - 如果这些 Middle Man 还有其他行为，可以运用 Replace Delegation With Inheritance 把它变成实责对象的子类
+    - 狎昵关系（Inappropriate Intimacy）
+        - 两个类过于亲密，花费太多时间探究彼此的 private 成分
+        - 过分狎昵的类必须拆散
+        - 可以使用 Move Method 和 Move Field 帮它们划清界限，从而减少狎昵行径
+        - 也可以试试使用 Change Bidirectional Association to Unidirectional 让其中一个类对另一个类斩断情丝
+        - 如果两个类实在是情投意合，可以运用 Extract Class 把两者共同点提炼到一个安全地点
+        - 也可以尝试运用 Hide Delegate 让另一个类来为它们传递
+        - 继承往往造成过度亲密，因为子类对超类的了解总是超过后者的主观愿望，如果你认为子类该独自存在，请使用 Replace Inheritance With Delegation 让它离开继承体系
+    - 异曲同工的类（Alternative Classes With Different Interfaces）
+        - 如果两个函数做同一件事，却有不同的签名，请运用 Rename Method 根据它们的用途重新命名；请反复运用 Move Method 将某些行为移入类，直到两者协议一致；也可以运用 Extract SuperClass，提炼出超类
+    - 不完美的库类（Incomplete Library Class）
+        - 复用常被视为对象的终极目的，但是复用的意义被高估
+        - 如果想修改苦累的一两个函数，可以运用 Introduce Foreign Method
+        - 如果想添加一大堆额外行为，可以运用 Introduce Local Extension
+    - 纯稚的数据类（Data Class）
+        - Data Class 是指它们拥有一些字段，以及用于访问（读写）这些字段的函数，除此之外一无长处
+        - 运用 Encapsulate Field 或 Encapsulate Collection 将他们封装起来
+        - 对于那些不应该被其他类修改的字段，使用 Remove Setting Method
+        - 找出那些取值和设置值的函数被其他类运用的点，尝试以 Move Method 把那些调用行为搬移到 Data Class 来；如果无法搬移整个函数，就运用 Extract Method 产生一个可以被搬移的函数；然后就可以把这些取值和设置值的函数隐藏起来
+        - Data Class 作为一个起点很好，但是若要让它们像成熟的对象那样参与整个系统的工作，就必须承担一定责任
+    - 被拒绝的遗赠（Refused Bequest）
+        - 子类应该继承超类的函数和数据
+        - 如果子类不需要或者不想继承，就需要为整个子类新建一个兄弟类，再运用 Push Down Method 和 Push Down Field 把所有用不到的函数下推给那个兄弟，这样超类就只持有所有子类共享的东西
+        - 所有超类都应该是抽象的
+        - 即使你不愿意继承接口，也不要胡乱修改继承体系，应该运用 Replace Inheritance With Delegation 来达到目的
+    - Comments（过多的注释）
+        - 注释之所以存在是因为代码很糟糕
+        - Comments 可以带我们找到很多坏味道，找到坏味道后我们应该以各种重构手法把坏味道去除。完成之后我们常常会发现：注释已经变得多余了，因为代码已经清楚说明了一切
+        - 如果你需要注释来解释一块代码做什么，试试 Extract Method
+        - 如果函数已经提炼出来，但还是需要注释来解释其行为，试试 Rename Method
+        - 如果你需要注释来说明某些系统的需求规格，试试 Introduce Assertion
+        - 当你感觉需要撰写注释时，请先尝试重构，试着让所有注释都变得多余
+        - 如果你不知道该做什么，这才是注释的良好运用时机
+        - 除了用来记述将来的打算之外，注释还可以用来标记你并无十足把握的区域。你可以在注释里写下自己"为什么做某某事"。这类信息可以帮助将来的修改者
+
+# 构筑测试环境
+如果想要进行重构，首要前提就是拥有一个可靠的测试环境。
+
+类应该包含它们自己的测试代码。每个类都应该有一个测试函数，并且以它来测试自己这个类。
+
+**确保所有测试都完全自动化，让它们检查自己的测试结果**
+
+**一套测试就是一个强大的 bug 侦测器，能够大大缩减查找 bug 所需的时间**
+
+撰写测试代码的最有用时机是在开始编程之前。当你需要添加新的特性时，先写相应的测试代码。编写测试代码其实就是在问自己：添加这个功能需要做些什么。编写测试代码还能使你把注意力
+集中于接口而非实现。预先写好的测试代码还能为你的工作按上一个明确的结束标志：一旦测试代码正常运行，工作就可以结束了。
+
+在重构前需要改造这些代码，使其能够自我测试。
